@@ -1,6 +1,7 @@
 #!/env/python3
 import ipaddress
 
+MAX_MASK = int('0xffffffff', 16)
 
 def toString(f: int):
     return intToBin(f) + ' : ' + str(ipaddress.ip_address(f))
@@ -14,14 +15,8 @@ def ipToBinString(ip):
     return ".".join(map(str,[intToBin(int(x)) for x in ip.__str__().split(".")]))
 
 
-def toBitArray(n: int):
+def intToBitArray(n: int):
     return [n >> i & 1 for i in range(32 - 1,-1,-1)]
-
-def bitArrayToInt(bitlist):
-    out = 0
-    for bit in bitlist:
-        out = (out << 1) | bit
-    return out
 
 def getNet(ip_adresses_str_array):
     # преобразуем в объекты IPv4Address для простоты использования
@@ -29,27 +24,27 @@ def getNet(ip_adresses_str_array):
     return getNetwork(min(ips), max(ips))
 
 def getNetwork(min: int, max: int):
-    min_bit_array = toBitArray(min)
-    max_bit_array = toBitArray(max)
+    min_bit_array = intToBitArray(min)
+    print(toString(min))
+    max_bit_array = intToBitArray(max)
+    print(toString(max))
 
-    mask_bit_array = []
-    last_true = True
+    mask_bit_array = [0 for i in range(32)]
     # производим побитовое сравнение слва направо
-    for i in range(0, 32):
-        if min_bit_array[i] == max_bit_array[i]:
-            if last_true:
-                mask_bit_array.append(1)
-            else:
-                mask_bit_array.append(0)
+    for i in range(32):
+        if (min_bit_array[i] == max_bit_array[i]):
+            mask_bit_array[i] = 1
         else:
-            last_true = False
-            mask_bit_array.append(0)
+            break
 
-    # вычисляем маску подсети
-    mask = bitArrayToInt(mask_bit_array)
-    # print(toString(mask))
     mask_bits = mask_bit_array.count(1)
+    # вычисляем маску подсети в виде числа
+    mask = MAX_MASK >> (32 - mask_bits) << (32 - mask_bits)
+    print(toString(mask))
+    # находим ip серти
     first_ip = min & mask
+    print(toString(first_ip))
+    # обозначение сети в виде xxx.xxx.xxx.xxx/xx
     net = str(ipaddress.ip_address(first_ip)) + '/' + str(mask_bits)
-
+    print(net)
     return ipaddress.ip_network(net)
