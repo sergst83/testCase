@@ -6,17 +6,8 @@ MAX_MASK = int('0xffffffff', 16)
 def toString(f: int):
     return intToBin(f) + ' : ' + str(ipaddress.ip_address(f))
 
-
 def intToBin(s: int):
     return "{0:08b}".format(s)
-
-
-def ipToBinString(ip):
-    return ".".join(map(str,[intToBin(int(x)) for x in ip.__str__().split(".")]))
-
-
-def intToBitArray(n: int):
-    return [n >> i & 1 for i in range(32 - 1,-1,-1)]
 
 def getNet(ip_adresses_str_array):
     # преобразуем в объекты IPv4Address для простоты использования
@@ -24,16 +15,13 @@ def getNet(ip_adresses_str_array):
     return getNetwork(min(ips), max(ips))
 
 def getNetwork(min: int, max: int):
-    min_bit_array = intToBitArray(min)
-    max_bit_array = intToBitArray(max)
-
     print(toString(min))
     print(toString(max))
 
     mask_bits = 0
     # производим побитовое сравнение слва направо
-    for i in range(32):
-        if (min_bit_array[i] == max_bit_array[i]):
+    for i in range(31,-1,-1):
+        if (min >> i == max >> i):
             mask_bits += 1
         else:
             break
